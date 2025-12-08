@@ -1,0 +1,18 @@
+project:
+  type: website
+
+website:
+  title: "Working with the tidycensus package"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - href: presentation.qmd
+        text: Presentation
+      - href: exercise.qmd
+        text: Exercise
+
+format: html
+
+execute: 
+  freeze: auto

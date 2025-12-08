@@ -1,0 +1,16 @@
+---
+title: "Working with the tidycensus package"
+author: Children's Environmental Health Initiative
+---
+
+This website contains all the resources for the Working with the tidycensus Package
+
+Installation instructions:
+
+-   [R](R_Installation_Instructions.pdf)  
+-   [ArcGIS Pro](ArcGIS_Pro_Installation_Instructions.pdf)
+
+Workshop:
+
+-   [Presentation](presentation.qmd)  
+-   [Exercise](exercise.qmd)

@@ -1,0 +1,22 @@
+color:
+  background: white
+  foreground: black
+
+logo: 
+  medium: brand/logos/compass_logo_10_20_rice_black.png
+
+typography:
+  fonts:
+    - family: Open Sans
+      source: google
+      weight: [400, 600, 700]
+      style: [normal, italic]       
+    - family: Inter
+      source: google
+      weight: [700]
+  base:
+    family: Open Sans
+    weight: 400
+  headings:
+    family: Inter
+    weight: 700

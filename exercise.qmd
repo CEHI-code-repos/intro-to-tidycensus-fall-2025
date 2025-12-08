@@ -1,0 +1,489 @@
+---
+brand: brand/worksheet.yml
+format:
+  typst:
+    margin:
+      x: 1in
+      y: 1in
+    logo:
+      width: 1in
+      location: right-top
+      padding-right: 0.5in
+      padding-top: 0.25in
+---
+
+# Working with the tidycensus package
+
+## Learning objectives
+
+- Locate Census variables and tables
+- Use the tidycensus package to interact with the Census API
+- Process Census data into a GIS-friendly format
+
+## Getting started
+
+The US Census has stores a mass of data which serves as the primary resource for nearly all public health research and secondary datasets. However, that doesn't mean its particulary easy to access and/or process. A quick search on data.census.gov might leave you a little disoriented. There are so many different tables and figuring out how you can download the data you want at the geographic resolution you require can be a laborious task. Even more so when you account for the fact that you may have to do quite a bit of reshaping of the data to get it in the particular format you require.
+
+These problems become further compounded when you have to do them every year or maybe even several times in a single year as you may be discovering new data. That's where `tidycensus` comes in. `tidycensus` is an R package that interfaces with the US Census API (Application Programming Interface) to make it relatively painless to download and process Decennial Census and American Community Survey (ACS) data.
+
+`tidycensus` also has a dependency called `tigris`. `tigris` is an R package designed to download Census boundaries. We will see later on how we can use `tigris`'s capabilities both inside `tidycensus` itself or from the package proper. We will also use the `tidyverse` for data manipulation, but you can feel free to translate any `tidyverse` functions to base R or any other data manipulation package.
+
+If you have not already, you can install both `tidycensus` and the `tidyverse` with:
+
+```r
+install.packages(c("tidycensus", "tidyverse"))
+```
+
+And then load each of the packages we will use today with:
+
+```{r}
+#| echo: false
+
+library(tidyverse)
+library(tidycensus)
+library(tigris)
+```
+
+One last note: the Decennial Census and American Community Survey each have their own intricacies so the following sections will all be split up by dataset. Additionally, since the discontinuation of the 3-year ACS estimates in 2015, the ACS has published two datasets: 1-year and 5-year estimates. We will focus on the 5-year estimates.
+
+## Getting an API key
+
+Before using the Census API, it is good practice to identify ourselves. We can do this by obtaining an API key. Go to https://api.census.gov/data/key_signup.html and fill out your information to obtain an API key. You will recieve an email with your API key.
+
+Run the following functions with your API key filled in.
+
+```r
+census_api_key("YOUR API KEY GOES HERE")
+
+# reload your environment variables
+readRenviron("~/.Renviron")
+```
+
+## Discovery
+
+Both the American Community Survey and Decennial Census Survey variables can be explored in R with the `load_variables()` function. But this isn't always the easiest approach.
+
+### American Community Survey
+
+Looking through the ACS5 estimates is quite simple.
+
+```{r}
+acs5_2023_vars <- load_variables(2023, "acs5")
+acs5_2023_vars
+```
+
+There are 28,261 variables! That's a lot to go through.
+
+```{r}
+acs5_2023_tables <- acs5_2023_vars |>
+  mutate(table = str_split_i(name, "_", 1)) |>
+  nest(variables = c(name, label, geography))
+acs5_2023_tables
+```
+
+We are probably more interested in overall topics so we could also search by table. Thankfully, there are a relatively more manageable 1,193 tables to go through. 
+
+You may notice that there are repetitive concepts that are the same concept but for a certain subgroup. We can remove these to simplify the concepts into "larger concepts".
+
+```{r}
+acs5_2023_largerconcepts <- acs5_2023_tables |>
+  mutate(larger_concept = str_remove(concept, " \\(.*\\)")) |>
+  nest(tables = c(table, concept, variables))
+acs5_2023_largerconcepts
+```
+
+This leaves only 725 larger concepts.
+
+We can now search through these topics programatically. For example, we can look for health insurance related variables by detecting the prefix `"insur"`.
+
+```{r}
+acs5_2023_largerconcepts |>
+  filter(str_detect(larger_concept, fixed("insur", ignore_case = TRUE)))
+
+# you can always unnest to look at the inidividual tables
+acs5_2023_largerconcepts |>
+  filter(str_detect(larger_concept, fixed("insur", ignore_case = TRUE))) |>
+  unnest(tables)
+
+# or even look for individual variables
+acs5_2023_largerconcepts |>
+  filter(str_detect(
+    larger_concept,
+    fixed("Health Insurance Coverage Status by Sex by Age")
+  )) |>
+  unnest(tables) |>
+  unnest(variables)
+```
+
+Or we can look for variables within RStudio or Positron's data viewer.
+
+```{r}
+#| eval: false
+
+View(acs5_2023_largerconcepts)
+
+# or combine the two
+acs5_2023_largerconcepts |>
+  filter(str_detect(
+    larger_concept,
+    fixed("Health Insurance Coverage Status by Sex by Age")
+  )) |>
+  unnest(tables) |>
+  unnest(variables) |>
+  View()
+```
+
+But this is not the only way to search for ACS variables. I recommend checking out the immensely helpful [Census Reporter](https://censusreporter.org/) website, which not only has a significantly simpler interface to search for ACS tables, but also a number of Topics articles which highlight tables which fall within broader topics of interest.
+
+![](photos/cr_home.png)
+
+Once you find a table of interest, you can even identify the identifiers of specific variables by simply hovering over them within the variable name.
+
+### Decennial Census
+
+Looking through the Decennial Census variables is a bit more complicated in comparsion. The first complication is that there are several summary files that make up the Decennial Census. We can use the `summary_files()` function to see just how many summary files compose the 2020 Census.
+
+```{r}
+summary_files(2020)
+```
+
+16 different files! Not to worry though, the Census website provides [documentation](https://www.census.gov/programs-surveys/decennial-census/data-products.2020.html#list-tab-1049675826.html) summarizing the 2020 Decennial Census Products.
+
+We can also look through all the files together. First, let's get all the summary files.
+
+```{r}
+dec_2020_sumfiles <- summary_files(2020)
+```
+
+Then let's filter down to only those `tidycensus` can retrieve info for AND only those that are for the 50 states.
+
+```{r}
+possible_sumfiles <- eval(formals(tidycensus::load_variables)$dataset)
+
+dec_2020_sumfiles <- dec_2020_sumfiles |>
+  keep(\(dataset) dataset %in% possible_sumfiles) |>
+  # remove decennial census sumfiles for guam, virgin islands, american samoa, northern marina islands
+  str_subset("(gu|vi|as|mp)$", negate = TRUE)
+```
+
+```{r}
+dec_2020_vars <- dec_2020_sumfiles |>
+  set_names() |>
+  map(\(dataset) load_variables(2020, dataset)) |>
+  list_rbind(names_to = "sumfile")
+dec_2020_vars
+```
+
+Notice that there are 19,744 variables across all of the summary files. We can use the same approach as before to look at the individual tables.
+
+```{r}
+dec_2020_tables <- dec_2020_vars |>
+  mutate(table = str_split_i(name, "_", 1), .after = sumfile) |>
+  nest(variables = c(name, label))
+dec_2020_tables
+```
+
+There's actually only 577 tables. Let's look at how many broader concepts there are using the same approach as before.
+
+```{r}
+dec_2020_largerconcepts <- dec_2020_tables |>
+  mutate(larger_concept = str_remove(concept, " \\(.*\\)")) |>
+  nest(tables = c(table, concept, variables))
+dec_2020_largerconcepts
+```
+
+There are only 141 larger concepts in our selected decennial census summary files. Now its a much more manageable task to find our variables/tables of interest.
+
+## Retrieval
+
+### American Community Survey
+
+Retrieving ACS data is requires the `get_acs()` function. I recommend using a named vector to specify your variables as it will make it significantly easier to understand what data you are pulling.
+
+```{r}
+il23_ac5_median_hh_inc <- get_acs(
+  geography = "tract",
+  variables = c(median_hh_inc = "B19013_001"),
+  year = 2023,
+  state = "IL"
+)
+il23_ac5_median_hh_inc
+```
+
+Notice that since the ACS yields us survey estimates, a margin of error is also provided.
+
+::: callout-note
+The ACS provides margin of errors at 90% confidence level. For more information about the US Census methodology pertaining to margin of errors check [Chapter 7 of the ACS Handbook](https://www.census.gov/content/dam/Census/library/publications/2018/acs/acs_general_handbook_2018_ch07.pdf).
+:::
+
+We can also specify several variables.
+
+```{r}
+il23_ac5_median_fam_inc <- get_acs(
+  geography = "tract",
+  variables = c(
+    median_fam_inc_2 = "B19119_002",
+    median_fam_inc_3 = "B19119_003",
+    median_fam_inc_4 = "B19119_004",
+    median_fam_inc_5 = "B19119_005",
+    median_fam_inc_6 = "B19119_006",
+    median_fam_inc_7p = "B19119_007"
+  ),
+  year = 2023,
+  state = "IL"
+)
+il23_ac5_median_fam_inc
+```
+
+Or even whole tables.
+
+```{r}
+il23_ac5_agg_hh_inc_by_age <- get_acs(
+  geography = "tract",
+  table = c(agg_hh_inc_by_age = "B19050"),
+  year = 2023,
+  state = "IL"
+)
+il23_ac5_agg_hh_inc_by_age
+```
+
+But notice that when you have several variables, you will recieve a table with several rows per geographic area. We can change that by changing the `output` from `"tidy"` to `"wide"`.
+
+```{r}
+il23_ac5_agg_hh_inc_by_age <- get_acs(
+  geography = "tract",
+  table = c(agg_hh_inc_by_age = "B19050"),
+  year = 2023,
+  state = "IL",
+  output = "wide"
+)
+il23_ac5_agg_hh_inc_by_age
+```
+
+This is especially helpful if you would like to also attach the geospatial features to the dataset.
+
+```{r}
+#| output: false
+
+il23_ac5_agg_hh_inc_by_age_geom <- get_acs(
+  geography = "tract",
+  table = c(agg_hh_inc_by_age = "B19050"),
+  year = 2023,
+  state = "IL",
+  output = "wide",
+  geometry = TRUE
+)
+il23_ac5_agg_hh_inc_by_age_geom
+```
+
+```{r}
+#| echo: false
+
+il23_ac5_agg_hh_inc_by_age_geom
+```
+
+### Decennial Census
+
+Retrieving Decennial Census data requires the `get_decennial()` function. It's interface is very similar to `get_acs()`,
+
+```{r}
+il23_dec_n_renters <- get_decennial(
+  geography = "tract",
+  variables = c(n_renters = "H5_002N"),
+  year = 2020,
+  sumfile = "dhc",
+  state = "IL"
+)
+```
+
+```{r}
+il23_dec_n_renters <- get_decennial(
+  geography = "tract",
+  variables = c(n_renters = "H5_002N"),
+  year = 2020,
+  sumfile = "dhc",
+  state = "IL"
+)
+```
+
+## Generation of derived estimates
+
+Both the ACS and Decennial census provide a ton of information. However, often times you may want to create a derived estimate. Examples could be estimates for larger age groups, converting count estimates into rates, or computing odds ratios. Whatever the purpose, `tidycensus` can help!
+
+Let's look at the first example: creating estimates for larger groups.
+
+I want to find the health insurance coverage rate for individuals 18 and below within Illinois at the census tract level.
+
+When I looked for health insurance coverage, I find that health insurance coverage status is provided stratified by sex and age.
+
+```{r}
+acs5_2023_largerconcepts |>
+  filter(str_detect(
+    larger_concept,
+    fixed("Health Insurance Coverage Status by Sex by Age")
+  )) |>
+  unnest(tables) |>
+  unnest(variables)
+```
+
+This means I'm going to have to add up all the variables for males and females 18 and below. 
+
+We can get the data first by specifying our query using `get_acs()`.
+```{r}
+il23_ac5_healthins <- get_acs(
+  geography = "tract",
+  table = "B27001",
+  year = 2023,
+  state = "IL"
+)
+```
+
+Using our variable information we retrieved earlier, we can add labels to all the variables.
+
+```{r}
+il23_ac5_healthins <- il23_ac5_healthins |>
+  left_join(acs5_2023_vars, join_by(variable == name)) |>
+  select(GEOID, label, estimate, moe) |>
+  mutate(
+    gender = str_remove(str_split_i(label, "!!", 3), ":"),
+    age_group = str_remove(str_split_i(label, "!!", 4), ":"),
+    coverage_status = str_remove(str_split_i(label, "!!", 5), ":")
+  )
+il23_ac5_healthins
+```
+
+And then, we can
+1. Filter out the variables with no gender, age_group or coverage_status.
+2. Filter the variables for those that represent 18 and under.
+3. Calculate the total number of 18 and under individuals with coverage and in total.
+4. Calculate the number of individuals covered divided by the number of individuals in total.
+
+```{r}
+il23_ac5_healthins18below <- il23_ac5_healthins |>
+  filter(!if_any(c(gender, age_group, coverage_status), is.na)) |>
+  filter(age_group %in% c("Under 6 years", "6 to 18 years")) |>
+  group_by(GEOID) |>
+  summarize(
+    n_covered = sum(estimate[
+      coverage_status == "With health insurance coverage"
+    ]),
+    n_total = sum(estimate)
+  ) |>
+  mutate(
+    pct_covered = n_covered / n_total
+  )
+il23_ac5_healthins18below
+```
+
+One thing you may have noticed is that in this process we dropped our margin or error estimates. This is not ideal because we lose any idea of reliability of our estimates. Thankfully, `tidycensus` can help with that. `tidycensus` has a host of `moe_*()` functions that can help you estimate margin of error for derived estimates. Let's use two of these, `moe_sum()` and `moe_prop()`.
+
+```{r}
+il23_ac5_healthins18below <- il23_ac5_healthins |>
+  filter(!if_any(c(gender, age_group, coverage_status), is.na)) |>
+  filter(age_group %in% c("Under 6 years", "6 to 18 years")) |>
+  group_by(GEOID) |>
+  summarize(
+    n_covered = sum(estimate[
+      coverage_status == "With health insurance coverage"
+    ]),
+    moe_n_covered = moe_sum(
+      moe[coverage_status == "With health insurance coverage"],
+      estimate = estimate[coverage_status == "With health insurance coverage"]
+    ),
+    n_total = sum(estimate),
+    moe_n_total = moe_sum(moe, estimate = estimate)
+  ) |>
+  mutate(
+    pct_covered = n_covered / n_total,
+    moe_pct_covered = moe_prop(n_covered, n_total, moe_n_covered, moe_n_total)
+  )
+il23_ac5_healthins18below
+```
+
+## Retrieval of geographic boundaries
+
+We retrieved and processed our data, but now lets transfer that data to ArcGIS Pro to visualize it.
+
+Our table above has our tract level data, but no geometry. We can use the `tigris` package to download the tract geometry and add it to our table!
+
+```{r}
+il23tracts <- tracts(state = "IL", cb = TRUE, year = 2023) |>
+  select(GEOID)
+
+il23_ac5_healthins18below_geom <- il23_ac5_healthins18below |>
+  left_join(x = il23tracts)
+il23_ac5_healthins18below_geom
+```
+
+## Visualization of estimates in R
+
+Making quick visualizations of geospatial data is easy with `ggplot2`, which is included in the tidyverse. However, it lacks the capability to add many of the elements you may be use to out of the box (e.g., scale bars, north arrows, etc.). Additionally, it is not as quite easy to set a classification method as in ArcGIS Pro. There are other packages that can help with these concerns like `tmap` or `ggspatial`, but going all of the R cartography tools could be a whole months long course on its own.
+
+Here we use `geom_sf()` to specify that we want to create a plot based on our spatial data where the fill is equal to the `pct_covered` variable. We also specify the label with `labs()` and set the theme to void to get rid of the background that `ggplot2` typically includes.
+
+```{r}
+ggplot(il23_ac5_healthins18below_geom) +
+  geom_sf(aes(fill = pct_covered * 100), color = NA) +
+  labs(fill = "18 and \nHealth Insurance\nCoverage (%)") +
+  theme_void()
+```
+
+## Visualization estimates in ArcGIS Pro
+
+Since we have the geography, can write a shapefile, geojson, geodatabase, geopackage, or any other major spatial format.
+
+```{r}
+#| eval: false
+
+library(sf)
+
+st_write(il23_ac5_healthins18below_geom, "il23_ac5_healthins18below.shp")
+# or
+st_write(il23_ac5_healthins18below_geom, "il23_ac5_healthins18below.geojson")
+# or
+st_write(
+  il23_ac5_healthins18below_geom,
+  "il23_ac5_healthins18below.gdb",
+  "il23_ac5_healthins18below"
+)
+# or
+st_write(
+  il23_ac5_healthins18below_geom,
+  "il23_ac5_healthins18below.gpkg",
+  "il23_ac5_healthins18below"
+)
+```
+
+Geopackage is a good choice for working within R and ArcGIS Pro because it is open source and supported by both ArcGIS Pro and R. So let's run:
+
+```{r}
+#| eval: false
+
+st_write(
+  il23_ac5_healthins18below_geom,
+  "il23_ac5_healthins18below.gpkg",
+  "il23_ac5_healthins18below"
+)
+```
+
+Within ArcGIS Pro, create a new Map Project.
+
+Click on **Add Data** and navigate to where you stored the *il23_ac5_healthins18below.gpkg* file.
+
+![](photos/add_data.png){width=300}
+
+Right click on the *main.il23_ac5_healthins18below* layer within your **Contents** pane and open up **Symbology**.
+
+Set the **Primary Symbology** to *Unclassed colors*, **Field** to *pct_covered* and use your preferred color scheme.
+
+![](photos/pri_symb.png){width=300}
+
+Under **Advanced Symbology Options** → **Format labels** you may also want to set **Percentage** as *Number represents a fraction* and **Rounding decimal places** to *2*.
+
+![](photos/adv_symb.png){width=300}
+
+Now you have a map like:
+
+![](photos/arcpro_map.png){width=500}
+
+There is so much more you can do to make this map your own and we encourage you to do so! But now you know how to find, retrieve, and visualize Census data!
