@@ -1,0 +1,191 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Working with the tidycensus package",
+    "section": "",
+    "text": "This website contains all the resources for the Working with the tidycensus Package\nInstallation instructions:\n\nR\n\nArcGIS Pro\n\nWorkshop:\n\nPresentation\n\nExercise"
+  },
+  {
+    "objectID": "presentation.html#learning-objectives",
+    "href": "presentation.html#learning-objectives",
+    "title": "Working with tidycensus: Automating Census Data Retrieval",
+    "section": "Learning Objectives",
+    "text": "Learning Objectives\n\nLocate Census variables and tables\nUse the tidycensus package to interact with the Census API\nProcess Census data into a GIS-friendly format"
+  },
+  {
+    "objectID": "presentation.html#why-use-r-to-retrieve-census-data",
+    "href": "presentation.html#why-use-r-to-retrieve-census-data",
+    "title": "Working with tidycensus: Automating Census Data Retrieval",
+    "section": "Why use R to retrieve Census data?",
+    "text": "Why use R to retrieve Census data?\n\nThe Census’s official website (data.census.gov) is hard to navigate.\nYou may need to pull the same data over and over again.\nIt’s reproducable and provides a data trail.\nIt can easily integrate with your GIS workflow."
+  },
+  {
+    "objectID": "presentation.html#application-programming-interface-api",
+    "href": "presentation.html#application-programming-interface-api",
+    "title": "Working with tidycensus: Automating Census Data Retrieval",
+    "section": "Application Programming Interface (API)",
+    "text": "Application Programming Interface (API)\n\nAn API is simply a way for things to communicate with each other!\nIn our case, we will be utilizing web APIs.\nYou can send utilize web API requests to retrieve data from a repository.\nNote: Each request utilizes the sender’s server resources. Be kind!"
+  },
+  {
+    "objectID": "presentation.html#r-api-clients",
+    "href": "presentation.html#r-api-clients",
+    "title": "Working with tidycensus: Automating Census Data Retrieval",
+    "section": "R API Clients",
+    "text": "R API Clients\n\nR is a programming language with an active community of developers publishing packages\nMany of these packages are aimed at retrieving data\nExamples include:\n\narcgislayers\nsocratadata\nfindSVI"
+  },
+  {
+    "objectID": "presentation.html#tidycensus",
+    "href": "presentation.html#tidycensus",
+    "title": "Working with tidycensus: Automating Census Data Retrieval",
+    "section": "tidycensus",
+    "text": "tidycensus\n\ntidycensus is an R package designed to create an easy to use inteface for interacting with Census API.\nCan also download Census geographies through it’s sister package, tigris.\n\n# install.packages(\"tidycensus\")\nlibrary(tidycensus)\nlibrary(tigris)"
+  },
+  {
+    "objectID": "presentation.html#other-helpful-r-packages",
+    "href": "presentation.html#other-helpful-r-packages",
+    "title": "Working with tidycensus: Automating Census Data Retrieval",
+    "section": "Other helpful R packages",
+    "text": "Other helpful R packages\n\n\ntidyverse\nA metapackage (package of packages) which provides helpful utilities to keep data “tidy”.\n\nsf\nThe major spatial R package. Provides utilities for reading, writing, and analyzing spatial data.\n\n# install.packages(c(\"tidyverse\", \"sf\"))\nlibrary(tidyverse)\nlibrary(sf)"
+  },
+  {
+    "objectID": "presentation.html#census-data",
+    "href": "presentation.html#census-data",
+    "title": "Working with tidycensus: Automating Census Data Retrieval",
+    "section": "Census data",
+    "text": "Census data\n\nAmerican Community Survey (ACS)\n\nMore temporally resolved\n\nDecennial Census\n\nMore geographically resolved\nMore variables"
+  },
+  {
+    "objectID": "presentation.html#finding-relevant-data---acs",
+    "href": "presentation.html#finding-relevant-data---acs",
+    "title": "Working with tidycensus: Automating Census Data Retrieval",
+    "section": "Finding relevant data - ACS",
+    "text": "Finding relevant data - ACS\nCensus Reporter - Great resource for ACS data"
+  },
+  {
+    "objectID": "presentation.html#finding-relevant-data---decennial",
+    "href": "presentation.html#finding-relevant-data---decennial",
+    "title": "Working with tidycensus: Automating Census Data Retrieval",
+    "section": "Finding relevant data - Decennial",
+    "text": "Finding relevant data - Decennial\n\nSeveral tables to look through\n\nCensus website provides documentation summarizing the 2020 Decennial Census Products.\n\ntidycensus can help you comb through these tables"
+  },
+  {
+    "objectID": "presentation.html#finding-relevant-data",
+    "href": "presentation.html#finding-relevant-data",
+    "title": "Working with tidycensus: Automating Census Data Retrieval",
+    "section": "Finding relevant data",
+    "text": "Finding relevant data\n\nload_variables()\n\nProvide a year and the name of the table\n\ntable names include\n\n\"acs5\" - 5-year ACS\n\"dhc\" - Demographic and Housing Characteristics\n\"dp\" - Demographic Profiles"
+  },
+  {
+    "objectID": "presentation.html#examples",
+    "href": "presentation.html#examples",
+    "title": "Working with tidycensus: Automating Census Data Retrieval",
+    "section": "Examples",
+    "text": "Examples\nload_variables(2023, \"acs5\")\nload_variables(2023, \"acs1\")\nload_variables(2020, \"dp\")\nload_variables(2020, \"dhc\")"
+  },
+  {
+    "objectID": "presentation.html#retriving-data",
+    "href": "presentation.html#retriving-data",
+    "title": "Working with tidycensus: Automating Census Data Retrieval",
+    "section": "Retriving data",
+    "text": "Retriving data\n\nget_acs or get_decennial() - The main tidycensus functions\nMost get_* function calls will provide a:\n\ngeography - ex: \"tract\"\nyear - ex: 2020\nvariables or table - ex: \"B01001_001\" or \"B01001\"\nstate - ex: “IL”"
+  },
+  {
+    "objectID": "presentation.html#examples-1",
+    "href": "presentation.html#examples-1",
+    "title": "Working with tidycensus: Automating Census Data Retrieval",
+    "section": "Examples",
+    "text": "Examples\nget_acs(\n  geography = \"county\",\n  year = 2023,\n  variables = \"B01001_001\"\n)"
+  },
+  {
+    "objectID": "presentation.html#examples-2",
+    "href": "presentation.html#examples-2",
+    "title": "Working with tidycensus: Automating Census Data Retrieval",
+    "section": "Examples",
+    "text": "Examples\nget_acs(\n  geography = \"county\",\n  year = 2023,\n  variables = \"B01001_001\"\n)"
+  },
+  {
+    "objectID": "presentation.html#examples-3",
+    "href": "presentation.html#examples-3",
+    "title": "Working with tidycensus: Automating Census Data Retrieval",
+    "section": "Examples",
+    "text": "Examples\nget_acs(\n  geography = \"tract\",\n  year = 2023,\n  variables = \"B01001_001\",\n  state = \"IL\"\n)"
+  },
+  {
+    "objectID": "presentation.html#examples-4",
+    "href": "presentation.html#examples-4",
+    "title": "Working with tidycensus: Automating Census Data Retrieval",
+    "section": "Examples",
+    "text": "Examples\nget_acs(\n  geography = \"tract\",\n  year = 2023,\n  variables = c(\"B01001_001\", \"B01001_002\"),\n  state = \"IL\"\n)"
+  },
+  {
+    "objectID": "presentation.html#examples-5",
+    "href": "presentation.html#examples-5",
+    "title": "Working with tidycensus: Automating Census Data Retrieval",
+    "section": "Examples",
+    "text": "Examples\nget_acs(\n  geography = \"tract\",\n  year = 2023,\n  table = \"B01001\"\n  state = \"IL\"\n)"
+  },
+  {
+    "objectID": "presentation.html#examples-6",
+    "href": "presentation.html#examples-6",
+    "title": "Working with tidycensus: Automating Census Data Retrieval",
+    "section": "Examples",
+    "text": "Examples\nget_decennial(\n  geography = \"tract\",\n  year = 2020,\n  table = \"DP1\",\n  sumfile = \"dp\",\n  state = \"IL\"\n)"
+  },
+  {
+    "objectID": "presentation.html#retrieving-geographies",
+    "href": "presentation.html#retrieving-geographies",
+    "title": "Working with tidycensus: Automating Census Data Retrieval",
+    "section": "Retrieving geographies",
+    "text": "Retrieving geographies\n\nThe get_* functions can also retrieve cartographic boundaries too.\n\nSimply add geometry = TRUE\n\nYou can separately get boundaries with the tigris functions:\n\ncounties(), tracts(), block_groups(), blocks()"
+  },
+  {
+    "objectID": "presentation.html#examples-7",
+    "href": "presentation.html#examples-7",
+    "title": "Working with tidycensus: Automating Census Data Retrieval",
+    "section": "Examples",
+    "text": "Examples\n# attaches cartographic geometry to your acs data\nget_acs(\n  geography = \"county\",\n  year = 2023,\n  variables = \"B01001_001\",\n  output = \"wide\",\n  geometry = TRUE\n)\n\n# retrieves cartographic geometry\ntigris::counties(state = \"IL\", cb = TRUE, year = 2023)\n# retrieves TIGER geometry\ntigris::tracts(state = \"IL\", cb = FALSE, year = 2023)"
+  },
+  {
+    "objectID": "presentation.html#producing-derivative-estimates",
+    "href": "presentation.html#producing-derivative-estimates",
+    "title": "Working with tidycensus: Automating Census Data Retrieval",
+    "section": "Producing derivative estimates",
+    "text": "Producing derivative estimates\n\nThe Census may provide estimates in a form than you require\n\nEx: counts when you need rates or subgrouped data when you need a large group\n\nIt may be self explanatory to add, multiply, or divide your estimate into a new estimate, but how do you calculate margins or errors?"
+  },
+  {
+    "objectID": "presentation.html#producing-derivative-estimates-1",
+    "href": "presentation.html#producing-derivative-estimates-1",
+    "title": "Working with tidycensus: Automating Census Data Retrieval",
+    "section": "Producing derivative estimates",
+    "text": "Producing derivative estimates\n\ntidycensus provides you with moe_* functions which can help you solve this problem.\nmoe_* functions are built to be easy to use with tidyverse functionality."
+  },
+  {
+    "objectID": "presentation.html#examples-8",
+    "href": "presentation.html#examples-8",
+    "title": "Working with tidycensus: Automating Census Data Retrieval",
+    "section": "Examples",
+    "text": "Examples\nget_acs(\n  geography = \"tract\",\n  variables = c(male_u5 = \"B01001_003\", male_5to9 = \"B01001_004\"),\n  year = 2023,\n  state = \"IL\"\n) |&gt;\n  group_by(GEOID) |&gt;\n  summarize(\n    male_u10 = sum(estimate),\n    male_u10_moe = moe_sum(moe, estimate)\n  )"
+  },
+  {
+    "objectID": "presentation.html#examples-9",
+    "href": "presentation.html#examples-9",
+    "title": "Working with tidycensus: Automating Census Data Retrieval",
+    "section": "Examples",
+    "text": "Examples\nget_acs(\n  geography = \"tract\",\n  variables = c(male_u5 = \"B01001_003\", male_5to9 = \"B01001_004\"),\n  year = 2023,\n  state = \"IL\"\n) |&gt;\n  group_by(GEOID) |&gt;\n  summarize(\n    male_u10 = sum(estimate),\n    male_u10_moe = moe_sum(moe, estimate)\n  )"
+  },
+  {
+    "objectID": "presentation.html#examples-10",
+    "href": "presentation.html#examples-10",
+    "title": "Working with tidycensus: Automating Census Data Retrieval",
+    "section": "Examples",
+    "text": "Examples\nget_acs(\n  geography = \"tract\",\n  variables = c(tot_pop = \"B01001_001\", male_u5 = \"B01001_003\"),\n  year = 2023,\n  state = \"IL\",\n  output = \"wide\"\n) |&gt;\n  mutate(\n    male_u5_pct = male_u5E / tot_popM,\n    male_u5_pct_moe = moe_prop(male_u5E, tot_popE, male_u5M, tot_popM)\n  )"
+  },
+  {
+    "objectID": "presentation.html#examples-11",
+    "href": "presentation.html#examples-11",
+    "title": "Working with tidycensus: Automating Census Data Retrieval",
+    "section": "Examples",
+    "text": "Examples\nget_acs(\n  geography = \"tract\",\n  variables = c(tot_pop = \"B01001_001\", male_u5 = \"B01001_003\"),\n  year = 2023,\n  state = \"IL\",\n  output = \"wide\"\n) |&gt;\n  mutate(\n    male_u5_pct = male_u5E / tot_popM,\n    male_u5_pct_moe = moe_prop(male_u5E, tot_popE, male_u5M, tot_popM)\n  )"
+  }
+]
