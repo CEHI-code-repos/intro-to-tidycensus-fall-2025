@@ -1,6 +1,7 @@
 ---
 title: "Working with the tidycensus package"
 author: Children's Environmental Health Initiative
+brand: brand/worksheet.yml
 ---
 
 This website contains all the resources for the Working with the tidycensus Package

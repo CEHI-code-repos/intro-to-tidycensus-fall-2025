@@ -1,6 +1,9 @@
 color:
+  palette:
+    cehi-blue: "#14145f"
   background: white
   foreground: black
+  primary: cehi-blue
 
 logo: 
   medium: brand/logos/compass_logo_10_20_rice_black.png
