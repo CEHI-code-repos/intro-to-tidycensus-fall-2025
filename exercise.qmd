@@ -37,7 +37,7 @@ install.packages(c("tidycensus", "tidyverse"))
 And then load each of the packages we will use today with:
 
 ```{r}
-#| echo: false
+#| output: false
 
 library(tidyverse)
 library(tidycensus)
