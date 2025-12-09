@@ -217,7 +217,7 @@ Ryan Zomorrodi
 <ul>
 <li>The Census’s official website (<a href="https://data.census.gov">data.census.gov</a>) is hard to navigate.</li>
 <li>You may need to pull the same data over and over again.</li>
-<li>It’s reproducable and provides a data trail.</li>
+<li>It’s reproducible and provides a data trail.</li>
 <li>It can easily integrate with your GIS workflow.</li>
 </ul>
 </section>
@@ -246,7 +246,7 @@ Ryan Zomorrodi
 <section id="tidycensus" class="slide level2">
 <h2><code>tidycensus</code></h2>
 <ul>
-<li><code>tidycensus</code> is an R package designed to create an easy to use inteface for interacting with Census API.</li>
+<li><code>tidycensus</code> is an R package designed to create an easy to use interface for interacting with Census API.</li>
 <li>Can also download Census geographies through it’s sister package, <code>tigris</code>.</li>
 </ul>
 <div class="sourceCode" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a></a><span class="co"># install.packages("tidycensus")</span></span>
@@ -273,11 +273,11 @@ Ryan Zomorrodi
 <li><strong>American Community Survey (ACS)</strong>
 <ul>
 <li>More temporally resolved</li>
+<li>More variables</li>
 </ul></li>
 <li><strong>Decennial Census</strong>
 <ul>
 <li>More geographically resolved</li>
-<li>More variables</li>
 </ul></li>
 </ul>
 </section>
@@ -477,7 +477,7 @@ Ryan Zomorrodi
 <span id="cb13-6"><a></a>  <span class="at">output =</span> <span class="st">"wide"</span></span>
 <span id="cb13-7"><a></a>) <span class="sc">|&gt;</span></span>
 <span id="cb13-8"><a></a>  <span class="fu">mutate</span>(</span>
-<span id="cb13-9"><a></a>    <span class="at">male_u5_pct =</span> male_u5E <span class="sc">/</span> tot_popM,</span>
+<span id="cb13-9"><a></a>    <span class="at">male_u5_pct =</span> male_u5E <span class="sc">/</span> tot_popE,</span>
 <span id="cb13-10"><a></a>    <span class="at">male_u5_pct_moe =</span> <span class="fu">moe_prop</span>(male_u5E, tot_popE, male_u5M, tot_popM)</span>
 <span id="cb13-11"><a></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>

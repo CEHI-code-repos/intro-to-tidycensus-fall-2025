@@ -18,7 +18,7 @@
     "href": "presentation.html#why-use-r-to-retrieve-census-data",
     "title": "Working with tidycensus: Automating Census Data Retrieval",
     "section": "Why use R to retrieve Census data?",
-    "text": "Why use R to retrieve Census data?\n\nThe Census’s official website (data.census.gov) is hard to navigate.\nYou may need to pull the same data over and over again.\nIt’s reproducable and provides a data trail.\nIt can easily integrate with your GIS workflow."
+    "text": "Why use R to retrieve Census data?\n\nThe Census’s official website (data.census.gov) is hard to navigate.\nYou may need to pull the same data over and over again.\nIt’s reproducible and provides a data trail.\nIt can easily integrate with your GIS workflow."
   },
   {
     "objectID": "presentation.html#application-programming-interface-api",
@@ -39,7 +39,7 @@
     "href": "presentation.html#tidycensus",
     "title": "Working with tidycensus: Automating Census Data Retrieval",
     "section": "tidycensus",
-    "text": "tidycensus\n\ntidycensus is an R package designed to create an easy to use inteface for interacting with Census API.\nCan also download Census geographies through it’s sister package, tigris.\n\n# install.packages(\"tidycensus\")\nlibrary(tidycensus)\nlibrary(tigris)"
+    "text": "tidycensus\n\ntidycensus is an R package designed to create an easy to use interface for interacting with Census API.\nCan also download Census geographies through it’s sister package, tigris.\n\n# install.packages(\"tidycensus\")\nlibrary(tidycensus)\nlibrary(tigris)"
   },
   {
     "objectID": "presentation.html#other-helpful-r-packages",
@@ -53,7 +53,7 @@
     "href": "presentation.html#census-data",
     "title": "Working with tidycensus: Automating Census Data Retrieval",
     "section": "Census data",
-    "text": "Census data\n\nAmerican Community Survey (ACS)\n\nMore temporally resolved\n\nDecennial Census\n\nMore geographically resolved\nMore variables"
+    "text": "Census data\n\nAmerican Community Survey (ACS)\n\nMore temporally resolved\nMore variables\n\nDecennial Census\n\nMore geographically resolved"
   },
   {
     "objectID": "presentation.html#finding-relevant-data---acs",
@@ -179,7 +179,7 @@
     "href": "presentation.html#examples-10",
     "title": "Working with tidycensus: Automating Census Data Retrieval",
     "section": "Examples",
-    "text": "Examples\nget_acs(\n  geography = \"tract\",\n  variables = c(tot_pop = \"B01001_001\", male_u5 = \"B01001_003\"),\n  year = 2023,\n  state = \"IL\",\n  output = \"wide\"\n) |&gt;\n  mutate(\n    male_u5_pct = male_u5E / tot_popM,\n    male_u5_pct_moe = moe_prop(male_u5E, tot_popE, male_u5M, tot_popM)\n  )"
+    "text": "Examples\nget_acs(\n  geography = \"tract\",\n  variables = c(tot_pop = \"B01001_001\", male_u5 = \"B01001_003\"),\n  year = 2023,\n  state = \"IL\",\n  output = \"wide\"\n) |&gt;\n  mutate(\n    male_u5_pct = male_u5E / tot_popE,\n    male_u5_pct_moe = moe_prop(male_u5E, tot_popE, male_u5M, tot_popM)\n  )"
   },
   {
     "objectID": "presentation.html#examples-11",
