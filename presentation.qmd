@@ -264,7 +264,7 @@ get_acs(
   output = "wide"
 ) |>
   mutate(
-    male_u5_pct = male_u5E / tot_popM,
+    male_u5_pct = male_u5E / tot_popE,
     male_u5_pct_moe = moe_prop(male_u5E, tot_popE, male_u5M, tot_popM)
   )
 ```
