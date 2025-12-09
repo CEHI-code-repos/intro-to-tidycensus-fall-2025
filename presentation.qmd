@@ -9,42 +9,39 @@ format:
 
 ## Learning Objectives
 
-- Locate Census variables and tables
-- Use the tidycensus package to interact with the Census API
-- Process Census data into a GIS-friendly format
+-   Locate Census variables and tables
+-   Use the tidycensus package to interact with the Census API
+-   Process Census data into a GIS-friendly format
 
 ## Why use R to retrieve Census data?
 
-- The Census's official website ([data.census.gov](https://data.census.gov)) is hard to navigate.
-- You may need to pull the same data over and over again.
-- It's reproducable and provides a data trail.
-- It can easily integrate with your GIS workflow.
+-   The Census's official website ([data.census.gov](https://data.census.gov)) is hard to navigate.
+-   You may need to pull the same data over and over again.
+-   It's reproducible and provides a data trail.
+-   It can easily integrate with your GIS workflow.
 
 ## Application Programming Interface (API)
 
-- An API is simply a way for things to communicate with each other! 
-- In our case, we will be utilizing web APIs.
-- You can send utilize web API requests to retrieve data from a repository.
-- **Note:** Each request utilizes the sender's server resources. Be kind!
+-   An API is simply a way for things to communicate with each other!
+-   In our case, we will be utilizing web APIs.
+-   You can send utilize web API requests to retrieve data from a repository.
+-   **Note:** Each request utilizes the sender's server resources. Be kind!
 
 ## R API Clients
 
-- R is a programming language with an active community of 
-  developers publishing packages
-- Many of these packages are aimed at retrieving data
-- Examples include:
-    - `arcgislayers`
-    - `socratadata`
-    - `findSVI`
+-   R is a programming language with an active community of developers publishing packages
+-   Many of these packages are aimed at retrieving data
+-   Examples include:
+    -   `arcgislayers`
+    -   `socratadata`
+    -   `findSVI`
 
 ## `tidycensus`
 
-- `tidycensus` is an R package designed to create an easy to use
-  inteface for interacting with Census API.
-- Can also download Census geographies through it's sister package,
-  `tigris`.
+-   `tidycensus` is an R package designed to create an easy to use interface for interacting with Census API.
+-   Can also download Census geographies through it's sister package, `tigris`.
 
-```r
+``` r
 # install.packages("tidycensus")
 library(tidycensus)
 library(tigris)
@@ -52,8 +49,7 @@ library(tigris)
 
 ## Other helpful R packages
 
-:::: {.columns}
-
+::::: columns
 ::: {.column width="50%"}
 `tidyverse`
 
@@ -65,10 +61,9 @@ A metapackage (package of packages) which provides helpful utilities to keep dat
 
 The major spatial R package. Provides utilities for reading, writing, and analyzing spatial data.
 :::
+:::::
 
-::::
-
-```r
+``` r
 # install.packages(c("tidyverse", "sf"))
 library(tidyverse)
 library(sf)
@@ -76,17 +71,17 @@ library(sf)
 
 ## Census data
 
-- **American Community Survey (ACS)**
-    - More temporally resolved
-- **Decennial Census**
-    - More geographically resolved 
-    - More variables
+-   **American Community Survey (ACS)**
+    -   More temporally resolved
+    -   More variables
+-   **Decennial Census**
+    -   More geographically resolved
 
 ## Finding relevant data - ACS
 
 [Census Reporter](https://censusreporter.org/) - Great resource for ACS data
 
-::: {layout-ncol=2}
+::: {layout-ncol="2"}
 ![](photos/cr_home.png)
 
 ![](photos/cr_topics.png)
@@ -94,22 +89,22 @@ library(sf)
 
 ## Finding relevant data - Decennial
 
-- Several tables to look through
-    - Census website provides [documentation](https://www.census.gov/programs-surveys/decennial-census/data-products.2020.html#list-tab-1049675826.html) summarizing the 2020 Decennial Census Products.
-- `tidycensus` can help you comb through these tables 
+-   Several tables to look through
+    -   Census website provides [documentation](https://www.census.gov/programs-surveys/decennial-census/data-products.2020.html#list-tab-1049675826.html) summarizing the 2020 Decennial Census Products.
+-   `tidycensus` can help you comb through these tables
 
 ## Finding relevant data
 
-- `load_variables()`
-    - Provide a `year` and the name of the table
-- table names include
-    - `"acs5"` - 5-year ACS
-    - `"dhc"` - Demographic and Housing Characteristics
-    - `"dp"` - Demographic Profiles
+-   `load_variables()`
+    -   Provide a `year` and the name of the table
+-   table names include
+    -   `"acs5"` - 5-year ACS
+    -   `"dhc"` - Demographic and Housing Characteristics
+    -   `"dp"` - Demographic Profiles
 
 ## Examples
 
-```r
+``` r
 load_variables(2023, "acs5")
 load_variables(2023, "acs1")
 load_variables(2020, "dp")
@@ -118,16 +113,16 @@ load_variables(2020, "dhc")
 
 ## Retriving data
 
-- `get_acs` or `get_decennial()` - The main `tidycensus` functions
-- Most `get_*` function calls will provide a:
-    - `geography` - ex: `"tract"`
-    - `year` - ex: `2020`
-    - `variables` or `table` - ex: `"B01001_001"` or `"B01001"`
-    - `state` - ex: "IL"
+-   `get_acs` or `get_decennial()` - The main `tidycensus` functions
+-   Most `get_*` function calls will provide a:
+    -   `geography` - ex: `"tract"`
+    -   `year` - ex: `2020`
+    -   `variables` or `table` - ex: `"B01001_001"` or `"B01001"`
+    -   `state` - ex: "IL"
 
 ## Examples
 
-```r
+``` r
 get_acs(
   geography = "county",
   year = 2023,
@@ -137,16 +132,17 @@ get_acs(
 
 ## Examples {auto-animate="true"}
 
-```{.r code-line-numbers="2|3|4"}
+``` {.r code-line-numbers="2|3|4"}
 get_acs(
   geography = "county",
   year = 2023,
   variables = "B01001_001"
 )
 ```
+
 ## Examples {auto-animate="true"}
 
-```{.r code-line-numbers="2,5"}
+``` {.r code-line-numbers="2,5"}
 get_acs(
   geography = "tract",
   year = 2023,
@@ -157,7 +153,7 @@ get_acs(
 
 ## Examples {auto-animate="true"}
 
-```{.r code-line-numbers="4"}
+``` {.r code-line-numbers="4"}
 get_acs(
   geography = "tract",
   year = 2023,
@@ -168,7 +164,7 @@ get_acs(
 
 ## Examples {auto-animate="true"}
 
-```{.r code-line-numbers="4"}
+``` {.r code-line-numbers="4"}
 get_acs(
   geography = "tract",
   year = 2023,
@@ -179,7 +175,7 @@ get_acs(
 
 ## Examples {auto-animate="true"}
 
-```{.r code-line-numbers="1,3-5,7"}
+``` {.r code-line-numbers="1,3-5,7"}
 get_decennial(
   geography = "tract",
   year = 2020,
@@ -191,14 +187,14 @@ get_decennial(
 
 ## Retrieving geographies
 
-- The `get_*` functions can also retrieve cartographic boundaries too.
-    - Simply add `geometry = TRUE`
-- You can separately get boundaries with the `tigris` functions:
-    - `counties()`, `tracts()`, `block_groups()`, `blocks()`
+-   The `get_*` functions can also retrieve cartographic boundaries too.
+    -   Simply add `geometry = TRUE`
+-   You can separately get boundaries with the `tigris` functions:
+    -   `counties()`, `tracts()`, `block_groups()`, `blocks()`
 
 ## Examples
 
-```{.r code-line-numbers="1,6,7|10-11|12-13"}
+``` {.r code-line-numbers="1,6,7|10-11|12-13"}
 # attaches cartographic geometry to your acs data
 get_acs(
   geography = "county",
@@ -216,18 +212,18 @@ tigris::tracts(state = "IL", cb = FALSE, year = 2023)
 
 ## Producing derivative estimates
 
-- The Census may provide estimates in a form than you require
-    - Ex: counts when you need rates or subgrouped data when you need a large group
-- It may be self explanatory to add, multiply, or divide your estimate into a new estimate, but how do you calculate margins or errors?
+-   The Census may provide estimates in a form than you require
+    -   Ex: counts when you need rates or subgrouped data when you need a large group
+-   It may be self explanatory to add, multiply, or divide your estimate into a new estimate, but how do you calculate margins or errors?
 
 ## Producing derivative estimates
 
-- `tidycensus` provides you with `moe_*` functions which can help you solve this problem.
-- `moe_*` functions are built to be easy to use with `tidyverse` functionality.
+-   `tidycensus` provides you with `moe_*` functions which can help you solve this problem.
+-   `moe_*` functions are built to be easy to use with `tidyverse` functionality.
 
 ## Examples
 
-```r
+``` r
 get_acs(
   geography = "tract",
   variables = c(male_u5 = "B01001_003", male_5to9 = "B01001_004"),
@@ -243,7 +239,7 @@ get_acs(
 
 ## Examples
 
-```{.r code-line-numbers="10"}
+``` {.r code-line-numbers="10"}
 get_acs(
   geography = "tract",
   variables = c(male_u5 = "B01001_003", male_5to9 = "B01001_004"),
@@ -259,7 +255,7 @@ get_acs(
 
 ## Examples
 
-```r
+``` r
 get_acs(
   geography = "tract",
   variables = c(tot_pop = "B01001_001", male_u5 = "B01001_003"),
@@ -272,9 +268,10 @@ get_acs(
     male_u5_pct_moe = moe_prop(male_u5E, tot_popE, male_u5M, tot_popM)
   )
 ```
+
 ## Examples
 
-```{.r code-line-numbers="10"}
+``` {.r code-line-numbers="10"}
 get_acs(
   geography = "tract",
   variables = c(tot_pop = "B01001_001", male_u5 = "B01001_003"),

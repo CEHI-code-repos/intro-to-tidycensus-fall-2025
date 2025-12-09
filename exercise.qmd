@@ -53,7 +53,7 @@ Before using the Census API, it is good practice to identify ourselves. We can d
 Run the following functions with your API key filled in.
 
 ```r
-census_api_key("YOUR API KEY GOES HERE")
+census_api_key("YOUR API KEY GOES HERE", install = TRUE)
 
 # reload your environment variables
 readRenviron("~/.Renviron")
