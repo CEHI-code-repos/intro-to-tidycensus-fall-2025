@@ -424,7 +424,7 @@ Here we use `geom_sf()` to specify that we want to create a plot based on our sp
 ```{r}
 ggplot(il23_ac5_healthins18below_geom) +
   geom_sf(aes(fill = pct_covered * 100), color = NA) +
-  labs(fill = "18 and \nHealth Insurance\nCoverage (%)") +
+  labs(fill = "18 and up\nHealth Insurance\nCoverage (%)") +
   theme_void()
 ```
 
